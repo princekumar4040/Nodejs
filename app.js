@@ -5,8 +5,8 @@ const bodyParser = require('body-parser');
 var cors = require('cors');
 const {User,connectDb} = require('./models');
 const passport = require('passport');
-
-
+const jwt=require('jsonwebtoken');
+require('./env');
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -43,17 +43,85 @@ res.send("data get");
 }
 )*/
 //let flag=true;
-app.post('/add', (req, res,) => {
-  if (flag)
-    {
-        console.log("Success!");
-       // res.redirect('/Home');
-       res.send("data get")
-    }
-    else
-    {
-        console.log("Error!");
-    }
+app.post('/login', (req, res, next) => {
+
+    User.User.find({email:req.body.email})
+    .exec()
+    .then(user=>{  
+      console.log(user) 
+     if(user.length<1)
+     {
+      return res.status(401).json(
+
+        {
+           message: "Auth failed"
+
+        }
+      ) }
+
+//       bcrypt.compare(req.body.password,  user[0].password, (err,result)=>{
+
+//           if(err){
+//         return res.status(402).json(
+//         {
+//           message: "Auth failed"
+
+//         }
+//          ) }
+
+//        if(result){
+
+//         return res.status(200).json({
+
+//           message:"Auth successfull"
+//         })
+//        }
+       
+//        res.status(403).json({message: 'Auth failed'})
+// })
+
+
+if(req.body.password==user[0].password)
+     {
+     const token=jwt.sign({
+
+         email:user[0].email,
+         userId:user[0]._id
+        },
+        process.env.JWT_KEY,
+        {
+          expiresIn:'1h'
+
+        }
+       
+
+       )
+
+
+      return res.status(200).json(
+
+        {  
+           message: "Auth successfull",
+           token:token
+        }
+      ) }
+
+
+      res.status(403).json({message: 'Auth failed'})
+
+
+    }     )
+    .catch(err=> {     
+   console.log(err);
+   res.status(500).json({
+
+    error: err
+   })
+
+
+    } )
+        
+   
   })
 
 
