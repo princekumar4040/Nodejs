@@ -6,6 +6,7 @@ var cors = require('cors');
 const {User,connectDb} = require('./models');
 const passport = require('passport');
 const jwt=require('jsonwebtoken');
+const auth=require('./middleware/middleware.js')()
 require('./env');
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -130,6 +131,21 @@ app.post('/register', (req,  res) => {
     console.log(req.body)
     res.send("data get");
 })
+
+app.get('/data',auth, (req,res,next )=>{
+
+User.User.find().then(user=>{
+
+  res.send(user);
+})
+
+
+ console.log(req.header('Authorization'))
+ next();
+}
+)
+
+
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 
